@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>OpenStreetMap Map</h1>
+    <div id="map" style="height: 500px;"></div>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+    <script>
+        var map = L.map('map').setView([{{ nodes.0.data.lat }}, {{ nodes.0.data.lon }}], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+            maxZoom: 10,
+        }).addTo(map);
+
+        {% comment %} para hacer puntos y graficar cosas  {% endcomment %}
+        {% comment %} {% for node in nodes %}
+            L.marker([{{ node.data.lat }}, {{ node.data.lon }}]).addTo(map);
+        {% endfor %} {% endcomment %}
+
+        {% for way in ways %}
+            var latlngs = [
+                {% for node_id in way.data.nd %}
+                    {% for node in nodes %}
+                        {% if node.data.id == node_id %}
+                            [{{ node.data.lat }}, {{ node.data.lon }}],
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            ];
+
+            L.polyline(latlngs, {color: 'blue'}).addTo(map);
+        {% endfor %}
+    </script>
+{% endblock %}
